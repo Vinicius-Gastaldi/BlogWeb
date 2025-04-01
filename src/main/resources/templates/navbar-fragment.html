@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/posts">Blog App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/posts">
+                        <i class="bi bi-list-task me-1"></i>Todos os Posts
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/posts/novo">
+                        <i class="bi bi-plus-circle me-1"></i>Criar Novo Post
+                    </a>
+                </li>
+            </ul>
+            <!-- Theme Switcher Button -->
+            <button class="btn btn-outline-secondary" id="theme-switcher" type="button" aria-label="Toggle theme">
+                <i class="bi" id="theme-switcher-icon"></i> <!-- Icon set by JS -->
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script th:src="@{/theme-switcher.js}"></script>

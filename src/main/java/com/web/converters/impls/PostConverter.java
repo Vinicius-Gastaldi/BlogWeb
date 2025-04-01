@@ -33,10 +33,10 @@ public class PostConverter implements Converter<Post, PostDTO> {
     @Override
     public Post toEntity(PostDTO postDTO) {
         Post post = new Post();
-        post.setId(postDTO.id());
-        post.setAutor(postDTO.autor());
-        post.setTitulo(postDTO.titulo());
-        post.setTexto(postDTO.texto());
+        post.setId(postDTO.getId());
+        post.setAutor(postDTO.getAutor());
+        post.setTitulo(postDTO.getTitulo());
+        post.setTexto(postDTO.getTexto());
 
         return post;
     }

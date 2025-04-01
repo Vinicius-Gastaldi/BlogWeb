@@ -37,6 +37,11 @@ public class ComentarioServiceImpl implements ComentarioService {
     }
 
     @Override
+    public List<Comentario> listarComentariosPorPost(UUID postId) {
+        return comentarioRepository.findByPostId(postId); // Método adicionado
+    }
+
+    @Override
     public Comentario atualizarComentario(UUID id, Comentario comentario) {
         Comentario comentarioExistente = comentarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Comentário não encontrado"));
         comentarioExistente.setComentario(comentario.getComentario());
@@ -47,4 +52,6 @@ public class ComentarioServiceImpl implements ComentarioService {
     public void deletarComentario(UUID id) {
         comentarioRepository.deleteById(id);
     }
+
+
 }

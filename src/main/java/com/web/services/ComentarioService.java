@@ -12,6 +12,8 @@ public interface ComentarioService {
 
     List<Comentario> listarTodosComentarios();
 
+    List<Comentario> listarComentariosPorPost(UUID postId); // Adicione esta linha
+
     Comentario atualizarComentario(UUID id, Comentario comentario);
 
     void deletarComentario(UUID id);

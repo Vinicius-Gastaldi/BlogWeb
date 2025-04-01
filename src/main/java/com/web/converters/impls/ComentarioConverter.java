@@ -4,17 +4,12 @@ import com.web.converters.Converter;
 import com.web.dtos.ComentarioDTO;
 import com.web.models.Comentario;
 import com.web.models.Post;
-import com.web.repositories.PostRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class ComentarioConverter implements Converter<Comentario, ComentarioDTO> {
-
-    private final PostRepository postRepository;
-
-    public ComentarioConverter(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     @Override
     public ComentarioDTO toDTO(Comentario comentario) {
@@ -22,22 +17,29 @@ public class ComentarioConverter implements Converter<Comentario, ComentarioDTO>
                 comentario.getId(),
                 comentario.getData(),
                 comentario.getComentario(),
-                comentario.getPost() != null ? comentario.getPost().getId() : null
+                getPostId(comentario.getPost())
         );
     }
 
     @Override
     public Comentario toEntity(ComentarioDTO comentarioDTO) {
         Comentario comentario = new Comentario();
-        comentario.setId(comentarioDTO.id());
-        comentario.setComentario(comentarioDTO.comentario());
-
-        if (comentarioDTO.postId() != null) {
-            Post post = postRepository.findById(comentarioDTO.postId())
-                    .orElseThrow(() -> new RuntimeException("Post não encontrado"));
-            comentario.setPost(post);
-        }
-
+        comentario.setId(comentarioDTO.getId()); // Usando getter
+        comentario.setComentario(comentarioDTO.getComentario()); // Usando getter
+        comentario.setPost(createPostReference(comentarioDTO.getPostId())); // Usando getter
         return comentario;
+    }
+
+
+    // ========== Métodos Auxiliares ==========
+    private UUID getPostId(Post post) {
+        return (post != null) ? post.getId() : null;
+    }
+
+    private Post createPostReference(UUID postId) {
+        if (postId == null) return null;
+        Post post = new Post();
+        post.setId(postId);
+        return post;
     }
 }

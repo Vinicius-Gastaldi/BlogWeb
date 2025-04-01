@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt" data-bs-theme="light" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Posts</title>
+    <!-- Load Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Load Bootstrap Icons from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom styles - Must come AFTER Bootstrap CSS to use its variables -->
+    <style>
+        .card {
+            /* Add transform and box-shadow to the transition */
+            transition: background-color 0.3s ease,
+            border-color 0.3s ease,
+            transform 0.2s ease-in-out, /* Smooth transform */
+            box-shadow 0.2s ease-in-out; /* Smooth shadow change */
+        }
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: var(--bs-box-shadow);
+
+        }
+        .card-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .card-title a:hover {
+            color: var(--bs-primary);
+        }
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .card-text {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar-fragment :: nav}"></div>
+
+<div class="container mt-5">
+
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <h1 class="h2 mb-0">Todos os Posts</h1>
+        <a href="/posts/novo" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Criar Novo Post
+        </a>
+    </div>
+
+    <!-- Single Column for Posts -->
+    <!-- Using col-lg-9 mx-auto to constrain width on large screens -->
+    <div class="col-lg-9 mx-auto" th:if="${not #lists.isEmpty(posts)}">
+        <!-- Iterate directly, adding margin bottom to each card -->
+        <div class="card shadow-sm mb-4" th:each="post : ${posts}">
+            <div class="card-body"> <!-- Removed d-flex flex-column as it's default now in style -->
+                <h5 class="card-title mb-2">
+                    <a th:href="@{/posts/{id}(id=${post.id})}" th:text="${post.titulo}">Post Title</a>
+                </h5>
+                <p class="card-subtitle mb-2 text-body-secondary"><small th:text="'Por: ' + ${post.autor}">By Author</small></p>
+                <!-- Increased font size using fs-5 and kept flex-grow-1 -->
+                <p class="card-text fs-5" th:text="${#strings.abbreviate(post.texto, 250)}">
+                    First few sentences of the post content go here... Adjusting length slightly too.
+                </p>
+                <!-- Card Footer Actions -->
+                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                    <a th:href="@{/posts/{id}(id=${post.id})}" class="btn btn-sm btn-outline-primary">
+                        Ler Mais <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                    <form th:action="@{/posts/{id}/excluir(id=${post.id})}" method="post" class="d-inline ms-2">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este post?');">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State Message -->
+    <div th:if="${#lists.isEmpty(posts)}" class="mt-4">
+        <!-- Also constrain empty message width for consistency -->
+        <div class="col-lg-9 mx-auto">
+            <div class="alert alert-secondary text-center" role="alert">
+                <i class="bi bi-info-circle me-2"></i>Nenhum post encontrado. Que tal <a href="/posts/novo" class="alert-link">criar um</a>?
+            </div>
+        </div>
+    </div>
+
+</div> <!-- /container -->
+
+<!-- Load Bootstrap JS from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<!-- Load local theme switcher JS -->
+<script th:src="@{/theme-switcher.js}"></script>
+</body>
+</html>

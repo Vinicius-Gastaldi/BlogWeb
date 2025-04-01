@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt" data-bs-theme="light" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamic Title -->
+    <title th:text="${editMode ? 'Editar Comentário' : 'Novo Comentário'}">Comment Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .card { transition: background-color 0.3s ease, border-color 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{navbar-fragment :: nav}"></div>
+
+<div class="container mt-5">
+    <div class="card shadow-sm col-lg-8 mx-auto">
+        <div class="card-header">
+            <!-- Dynamic Header -->
+            <h1 class="h3 mb-0" th:text="${editMode ? 'Editar Comentário' : 'Adicionar Comentário'}"></h1>
+        </div>
+        <div class="card-body">
+            <!-- Form submits to the main save endpoint -->
+            <form th:action="@{/comentarios}" th:object="${comentarioDTO}" method="post">
+
+                <!-- Hidden field for ID (populated only in edit mode) -->
+                <input type="hidden" th:field="*{id}" />
+                <!-- Hidden field for Post ID (always needed) -->
+                <input type="hidden" th:field="*{postId}" />
+
+                <div class="mb-3">
+                    <label for="comentario" class="form-label">Seu Comentário:</label>
+                    <textarea id="comentario" th:field="*{comentario}" class="form-control" required rows="4" placeholder="Escreva seu comentário aqui..."></textarea>
+                    <!-- Display validation errors if any -->
+                    <div th:if="${#fields.hasErrors('comentario')}" th:errors="*{comentario}" class="text-danger small mt-1"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <!-- Dynamic Button Text -->
+                    <button type="submit" class="btn btn-primary">
+                        <i th:class="${editMode ? 'bi bi-save' : 'bi bi-send'}"></i>
+                        <span th:text="${editMode ? ' Atualizar Comentário' : ' Enviar Comentário'}">Save</span>
+                    </button>
+                    <a th:href="@{/posts/{id}(id=${comentarioDTO.postId})}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Voltar ao Post
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/theme-switcher.js}"></script>
+</body>
+</html>
