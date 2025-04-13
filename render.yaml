@@ -1,0 +1,53 @@
+# WARNING: Storing passwords directly in this file is INSECURE
+# as it commits them to Git. Use Render Secret Files or Environment Groups instead.
+
+# Render Blueprint Specification: https://render.com/docs/blueprint-spec
+services:
+  #---------------------------------------
+  # MySQL Database (Private Service)
+  #---------------------------------------
+  - type: pserv # Private Service
+    name: blog-db
+    # Use an official Docker image
+    image:
+      url: mysql:8.0
+    region: frankfurt # IMPORTANT: Choose YOUR region
+    plan: free # Or choose a paid instance type
+    # Persistent Disk is ESSENTIAL
+    disks:
+      - name: blog-db-data
+        mountPath: /var/lib/mysql
+        sizeGB: 1 # Adjust size as needed
+    # Environment variables to configure the MySQL container
+    envVars:
+      - key: MYSQL_DATABASE
+        value: blogappbd # Database name to create automatically
+      # --- INSECURE: Password directly in the file ---
+      - key: MYSQL_ROOT_PASSWORD
+        value: "root" # <-- REPLACE WITH YOUR ACTUAL PASSWORD
+
+  #---------------------------------------
+  # Spring Boot Application (Web Service)
+  #---------------------------------------
+  - type: web # Web Service
+    name: blog-app
+    env: docker # Build from Dockerfile
+    region: frankfurt # IMPORTANT: Use the SAME region as the database service
+    plan: free # Or choose a paid instance type
+    # Build settings
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    # Environment variables for the Spring Boot application
+    envVars:
+      # Database Connection URL
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://${blog-db.internalHost}:3306/blogappbd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      # --- Use root user ---
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      # --- INSECURE: Password directly in the file ---
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: "root" # <-- REPLACE WITH THE SAME PASSWORD AS ABOVE
+      # Port configuration
+      - key: PORT
+        value: 8080
