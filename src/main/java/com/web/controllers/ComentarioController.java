@@ -4,6 +4,7 @@ import com.web.dtos.ComentarioDTO;
 import com.web.models.Comentario;
 import com.web.services.ComentarioService;
 import com.web.converters.impls.ComentarioConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,6 +21,7 @@ public class ComentarioController {
     private final ComentarioService comentarioService;
     private final ComentarioConverter comentarioConverter;
 
+    @Autowired
     public ComentarioController(ComentarioService comentarioService,
                                 ComentarioConverter comentarioConverter) {
         this.comentarioService = comentarioService;

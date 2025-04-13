@@ -5,6 +5,7 @@ import com.web.models.Comentario;
 import com.web.models.Post;
 import com.web.services.PostService;
 import com.web.converters.impls.PostConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,6 +22,7 @@ public class PostController {
     private final ComentarioService comentarioService; // Declare o serviço
     private final PostConverter postConverter;
 
+    @Autowired
     public PostController(PostService postService,ComentarioService comentarioService, PostConverter postConverter) {
         this.postService = postService;
         this.comentarioService = comentarioService; // Injeção do ComentarioService

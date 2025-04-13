@@ -1,0 +1,59 @@
+version: '3.8' # Specify Compose file version
+
+services:
+  # Service for the MySQL Database
+  db:
+    image: mysql:8.0 # Use an official MySQL 8.0 image
+    container_name: blog-db # Optional: Give the container a specific name
+    restart: unless-stopped # Restart policy
+    environment:
+      # --- ONLY THESE TWO ARE NEEDED for using root ---
+      # Set the root password for the MySQL instance inside the container
+      MYSQL_ROOT_PASSWORD: root
+      # Creates this database automatically on first run
+      MYSQL_DATABASE: blogappbd
+      # --- REMOVED MYSQL_USER and MYSQL_PASSWORD as       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-proot"]
+      #      interval: 10s
+      #      timeout: 5s
+      #      retries: 5they are not needed when only using root ---
+    volumes:
+      - db_data:/var/lib/mysql # Mount a named volume to persist database data
+    networks:
+      - blog-network # Connect to the custom network
+    healthcheck:
+      # Changed test command to execute a simple query using CMD-SHELL
+      test: [ "CMD-SHELL", "mysql -h localhost -u root -proot -e 'SELECT 1'" ]
+      interval: 15s        # Slightly increased interval
+      timeout: 10s         # Slightly increased timeout
+      retries: 5
+      start_period: 60s    # IMPORTANT: Wait 60 seconds before starting health checks
+
+  # Service for your Spring Boot Application
+  app:
+    build: . # Build the image from the Dockerfile in the current directory
+    container_name: blog-app # Optional: Give the container a specific name
+    restart: unless-stopped
+    depends_on:
+      db: # Wait for the db service to be ready
+        condition: service_healthy
+    ports:
+      - "8080:8080" # Map host port 8080 to container port 8080
+    environment:
+      # Override application.properties using environment variables
+      # Connect to the database using the service name 'db' as the hostname
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/blogappbd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      # Use the root username
+      SPRING_DATASOURCE_USERNAME: root
+      # Use the root password defined above for the db service
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - blog-network # Connect to the custom network
+
+volumes:
+  # Define the named volume for persistent database storage
+  db_data:
+
+networks:
+  # Define the custom network
+  blog-network:
+    driver: bridge
