@@ -1,5 +1,4 @@
-# WARNING: Storing passwords directly in this file is INSECURE
-# as it commits them to Git. Use Render Secret Files or Environment Groups instead.
+# WARNING: Storing passwords directly in this file is INSECURE.
 
 # Render Blueprint Specification: https://render.com/docs/blueprint-spec
 services:
@@ -8,45 +7,39 @@ services:
   #---------------------------------------
   - type: pserv # Private Service
     name: blog-db
+    # --- ADDED: Explicitly state it's Docker ---
+    env: docker
     image:
       url: mysql:8.0
     region: oregon # IMPORTANT: Choose YOUR region
-    plan: free # Or choose a paid instance type
-    # --- CORRECTED disk definition based on documentation ---
-    disk:
-      name: blog-db-data        # Required: Name for the persistent disk resource
-      mountPath: /var/lib/mysql # Required: Where to mount inside the container
-      sizeGB: 1                 # Optional: Explicitly setting size (defaults to 10 if omitted)
-    # Environment variables to configure the MySQL container
+    # --- CHANGED: Free plan doesn't support disks for pserv ---
+    plan: starter # Or another paid plan that supports disks
+    # Persistent Disk configuration
     envVars:
       - key: MYSQL_DATABASE
-        value: blogappbd # Database name to create automatically
-      # --- INSECURE: Password directly in the file ---
+        value: blogappbd
       - key: MYSQL_ROOT_PASSWORD
-        value: "root" # <-- REPLACE WITH YOUR ACTUAL PASSWORD if not using 'root'
+        value: "root" # <-- INSECURE: Replace if not using 'root'
 
   #---------------------------------------
   # Spring Boot Application (Web Service)
   #---------------------------------------
   - type: web # Web Service
     name: blog-app
-    env: docker # Build from Dockerfile
-    region: oregon # IMPORTANT: Use the SAME region as the database service
-    plan: free # Or choose a paid instance type
+    env: docker # Correctly specified as Docker
+    region: oregon # IMPORTANT: Use the SAME region
+    # --- Web Service can often stay on free if resources suffice ---
+    plan: free # Or choose a paid instance type if needed
     # Build settings
     dockerContext: .
     dockerfilePath: ./Dockerfile
-    # Environment variables for the Spring Boot application
+    # Environment variables
     envVars:
-      # Database Connection URL
       - key: SPRING_DATASOURCE_URL
         value: jdbc:mysql://${blog-db.internalHost}:3306/blogappbd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      # --- Use root user ---
       - key: SPRING_DATASOURCE_USERNAME
         value: root
-      # --- INSECURE: Password directly in the file ---
       - key: SPRING_DATASOURCE_PASSWORD
-        value: "root" # <-- Use the same password as MYSQL_ROOT_PASSWORD
-      # Port configuration
+        value: "root" # <-- INSECURE: Use the same password as MYSQL_ROOT_PASSWORD
       - key: PORT
         value: 8080
