@@ -1,0 +1,50 @@
+# Render Blueprint Specification: https://render.com/docs/blueprint-spec
+services:
+  #---------------------------------------
+  # MySQL Database (Private Service)
+  #---------------------------------------
+  - type: pserv # Start of the service definition (list item)
+    name: blog-db # Property of the service
+    image: # Property of the service
+      url: mysql:8.0
+    region: frankfurt # Property of the service
+    plan: free # Property of the service
+    # The 'disks' key MUST be at the same indentation level as 'name', 'image', 'region', etc.
+    disks: # Property of the service
+      # The list item '-' under disks MUST be indented further
+      - name: blog-db-data
+        mountPath: /var/lib/mysql
+        sizeGB: 1
+    # The 'envVars' key MUST be at the same indentation level as 'name', 'image', 'region', etc.
+    envVars: # Property of the service
+      - key: MYSQL_DATABASE
+        value: blogappbd
+      - key: MYSQL_ROOT_PASSWORD
+        # Using value directly (INSECURE - Replace with actual password)
+        value: "root" # <-- REPLACE
+
+  #---------------------------------------
+  # Spring Boot Application (Web Service)
+  #---------------------------------------
+  - type: web # Web Service
+    name: blog-app
+    env: docker # Build from Dockerfile
+    region: oregon # IMPORTANT: Use the SAME region as the database service
+    plan: free # Or choose a paid instance type
+    # Build settings
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    # Environment variables for the Spring Boot application
+    envVars:
+      # Database Connection URL
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://${blog-db.internalHost}:3306/blogappbd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      # --- Use root user ---
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      # --- INSECURE: Password directly in the file ---
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: "root" # <-- REPLACE WITH THE SAME PASSWORD AS ABOVE
+      # Port configuration
+      - key: PORT
+        value: 8080
