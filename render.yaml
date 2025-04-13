@@ -2,13 +2,6 @@
 # as it commits them to Git. Use Render Secret Files or Environment Groups instead.
 
 # Render Blueprint Specification: https://render.com/docs/blueprint-spec
-
-# --- Try defining disks at the top level ---
-disks:
-  - name: blog-db-data # Define the disk name here
-    sizeGB: 1         # Define size here
-    # mountPath is defined where it's used (in the service)
-
 services:
   #---------------------------------------
   # MySQL Database (Private Service)
@@ -18,33 +11,42 @@ services:
     image:
       url: mysql:8.0
     region: oregon # IMPORTANT: Choose YOUR region
-    plan: free
-    # --- Reference the disk and specify mountPath here ---
-    disk: # Use singular 'disk' to reference the defined disk
-      name: blog-db-data # Reference the disk defined above
-      mountPath: /var/lib/mysql # Specify where to mount it in this service
+    plan: free # Or choose a paid instance type
+    # --- CORRECTED disk definition based on documentation ---
+    disk:
+      name: blog-db-data        # Required: Name for the persistent disk resource
+      mountPath: /var/lib/mysql # Required: Where to mount inside the container
+      sizeGB: 1                 # Optional: Explicitly setting size (defaults to 10 if omitted)
+    # Environment variables to configure the MySQL container
     envVars:
       - key: MYSQL_DATABASE
-        value: blogappbd
+        value: blogappbd # Database name to create automatically
+      # --- INSECURE: Password directly in the file ---
       - key: MYSQL_ROOT_PASSWORD
-        value: "root" # <-- Using root as password
+        value: "root" # <-- REPLACE WITH YOUR ACTUAL PASSWORD if not using 'root'
 
   #---------------------------------------
   # Spring Boot Application (Web Service)
   #---------------------------------------
   - type: web # Web Service
     name: blog-app
-    env: docker
-    region: oregon # IMPORTANT: Use the SAME region
-    plan: free
+    env: docker # Build from Dockerfile
+    region: oregon # IMPORTANT: Use the SAME region as the database service
+    plan: free # Or choose a paid instance type
+    # Build settings
     dockerContext: .
     dockerfilePath: ./Dockerfile
+    # Environment variables for the Spring Boot application
     envVars:
+      # Database Connection URL
       - key: SPRING_DATASOURCE_URL
         value: jdbc:mysql://${blog-db.internalHost}:3306/blogappbd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      # --- Use root user ---
       - key: SPRING_DATASOURCE_USERNAME
         value: root
+      # --- INSECURE: Password directly in the file ---
       - key: SPRING_DATASOURCE_PASSWORD
-        value: "root" # <-- Using root as password
+        value: "root" # <-- Use the same password as MYSQL_ROOT_PASSWORD
+      # Port configuration
       - key: PORT
         value: 8080
